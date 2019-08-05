@@ -94,7 +94,10 @@ void processFrame(CAN_FRAME &frame) {
     pose.clutch = clutch;
   }
   else if (frame.id == 0x141) {
-    // TODO: transmission (we can only see if we are in gear)
+    // TODO: transmission (we can only see if we are in gear for manual BRZs)
+  }
+  else if (frame.id == 0x144) {
+    // cruise control (potential replacement for up and downshifts)
   }
   else if (frame.id == 0x152) {
     bool ebrake = frame.data.bit[51];
