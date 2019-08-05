@@ -1,4 +1,4 @@
-# Macchina CAN to UART
+# Macchina M2 CAN Forwarder
 
 Parses data from the Macchina M2 CAN transceivers and forwards along over UART.
 This project is used as the first stage of using car data to control an Xbox controller
