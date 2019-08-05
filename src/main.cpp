@@ -10,6 +10,8 @@ struct Pose {
   bool downshift;
   bool ebrake;
   bool rewind;
+  bool view;
+  bool menu;
 };
 
 Pose pose;
@@ -145,11 +147,10 @@ void loop() {
     Serial.print(",");
     Serial.print(pose.rewind);
     Serial.print(",");
-    Serial.print(pose.ebrake);
+    Serial.print(pose.view);
     Serial.print(",");
-    Serial.print(pose.ebrake);
-    Serial.print(",");
-    Serial.println(pose.ebrake);
+    Serial.print(pose.menu);
+    Serial3.print('\n');
     
     Serial3.print(pose.steering);
     Serial3.print(",");
@@ -167,11 +168,9 @@ void loop() {
     Serial3.print(",");
     Serial3.print(pose.rewind);
     Serial3.print(",");
-    Serial3.print(pose.ebrake);
+    Serial3.print(pose.view);
     Serial3.print(",");
-    Serial3.print(pose.ebrake);
-    Serial3.print(",");
-    Serial3.print(pose.ebrake);
+    Serial3.print(pose.menu);
     Serial3.print('\n');
 
     newData = false;
