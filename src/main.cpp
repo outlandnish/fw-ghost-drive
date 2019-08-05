@@ -38,6 +38,7 @@ void setup() {
   digitalWrite(DS7_BLUE, HIGH);
 
   SerialUSB.begin(115200);
+  Serial.begin(9600);
   Serial3.begin(9600);
 
   delay(50);
@@ -128,6 +129,28 @@ void loop() {
   }
 
   if (newData) {
+    Serial.print(pose.steering);
+    Serial.print(",");
+    Serial.print(pose.accelerator);
+    Serial.print(",");
+    Serial.print(pose.brakes);
+    Serial.print(",");
+    Serial.print(pose.clutch);
+    Serial.print(",");
+    Serial.print(pose.upshift);
+    Serial.print(",");
+    Serial.print(pose.downshift);
+    Serial.print(",");
+    Serial.print(pose.ebrake);
+    Serial.print(",");
+    Serial.print(pose.rewind);
+    Serial.print(",");
+    Serial.print(pose.ebrake);
+    Serial.print(",");
+    Serial.print(pose.ebrake);
+    Serial.print(",");
+    Serial.println(pose.ebrake);
+    
     Serial3.print(pose.steering);
     Serial3.print(",");
     Serial3.print(pose.accelerator);
@@ -150,28 +173,6 @@ void loop() {
     Serial3.print(",");
     Serial3.print(pose.ebrake);
     Serial3.print('\n');
-
-    SerialUSB.print(pose.steering);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.accelerator);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.brakes);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.clutch);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.upshift);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.downshift);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.ebrake);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.rewind);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.ebrake);
-    SerialUSB.print(",");
-    SerialUSB.print(pose.ebrake);
-    SerialUSB.print(",");
-    SerialUSB.println(pose.ebrake);
 
     newData = false;
   }
