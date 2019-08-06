@@ -40,8 +40,8 @@ void setup() {
   digitalWrite(DS7_BLUE, HIGH);
 
   SerialUSB.begin(115200);
-  Serial.begin(9600);
-  Serial3.begin(9600);
+  Serial.begin(19200);
+  Serial3.begin(115200);
 
   delay(50);
   SerialUSB.println("Initializing...");
@@ -67,21 +67,22 @@ void setup() {
 }
 
 void processFrame(CAN_FRAME &frame) {
+  newData = false;
   if (frame.id == 0xD0) {
     int16_t steering = frame.data.bytes[1] << 8 | frame.data.bytes[0];
 
-    if (pose.steering != steering)
+    if (steering != pose.steering) {
       newData = true;
-      
-    pose.steering = steering;
+      pose.steering = steering;
+    }
   }
   else if (frame.id == 0xD1) {
     uint8_t brakes = frame.data.bytes[2];
 
-    if (pose.brakes != brakes)
+    if (brakes != pose.brakes) {
       newData = true;
-
-    pose.brakes = brakes;
+      pose.brakes = brakes;
+    }
   }
   else if (frame.id == 0x140) {
     uint8_t accelerator = frame.data.bytes[0];
@@ -100,13 +101,22 @@ void processFrame(CAN_FRAME &frame) {
     // cruise control (potential replacement for up and downshifts)
   }
   else if (frame.id == 0x152) {
-    bool ebrake = frame.data.bit[51];
+    /*bool ebrake = frame.data.bit[51];
 
     if (pose.ebrake != ebrake)
       newData = true;
 
-    pose.ebrake = ebrake;
+    pose.ebrake = ebrake;*/
   }
+}
+
+void randomNoise() {
+  pose.steering = rand() % 65535 - 32767; 
+  pose.accelerator = rand() % 255;
+  pose.brakes = rand() % 255;
+  pose.clutch = rand() % 1;
+  pose.downshift = rand() % 1;
+  newData = true;
 }
 
 void loop() {
@@ -124,36 +134,36 @@ void loop() {
     processFrame(incoming);
   }
 
-  bool pressed;
-  pressed = !digitalRead(Button1);
+  bool pressed = !digitalRead(Button1);
   digitalWrite(DS5, !pressed);
   
   if (pressed != pose.ebrake) {
-    newData = true;
-    pose.ebrake = pressed;
+    //newData = true;
+    //pose.ebrake = pressed;
+    randomNoise();
   }
 
   if (newData) {
-    Serial.print(pose.steering);
-    Serial.print(",");
-    Serial.print(pose.accelerator);
-    Serial.print(",");
-    Serial.print(pose.brakes);
-    Serial.print(",");
-    Serial.print(pose.clutch);
-    Serial.print(",");
-    Serial.print(pose.upshift);
-    Serial.print(",");
-    Serial.print(pose.downshift);
-    Serial.print(",");
-    Serial.print(pose.ebrake);
-    Serial.print(",");
-    Serial.print(pose.rewind);
-    Serial.print(",");
-    Serial.print(pose.view);
-    Serial.print(",");
-    Serial.print(pose.menu);
-    Serial3.print('\n');
+    SerialUSB.print(pose.steering);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.accelerator);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.brakes);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.clutch);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.upshift);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.downshift);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.ebrake);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.rewind);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.view);
+    SerialUSB.print(",");
+    SerialUSB.print(pose.menu);
+    SerialUSB.print('\n');
     
     Serial3.print(pose.steering);
     Serial3.print(",");
