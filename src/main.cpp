@@ -1,5 +1,10 @@
 #include <Arduino.h>
+#include <SPI.h>
+#include <McpDigitalPot.h>
 #include <due_can.h>
+
+float resistance = 9760.0;        // 9.76 kohm
+McpDigitalPot pot = McpDigitalPot(SPI0_CS0, 10000.0);
 
 struct Pose {
   int16_t steering;
@@ -38,6 +43,11 @@ void setup() {
   digitalWrite(DS7_RED, HIGH);
   digitalWrite(DS7_GREEN, HIGH);
   digitalWrite(DS7_BLUE, HIGH);
+
+  SPI.begin();
+  pot.setResistance(0, 0);
+  pot.setResistance(1, 0);
+  pot.scale = 255.0;
 
   SerialUSB.begin(115200);
   Serial.begin(19200);
@@ -101,13 +111,24 @@ void processFrame(CAN_FRAME &frame) {
     // cruise control (potential replacement for up and downshifts)
   }
   else if (frame.id == 0x152) {
-    /*bool ebrake = frame.data.bit[51];
+    bool ebrake = frame.data.bit[51];
 
     if (pose.ebrake != ebrake)
       newData = true;
 
-    pose.ebrake = ebrake;*/
+    pose.ebrake = ebrake;
   }
+
+  Serial.print("ID: 0x");
+  Serial.print(frame.id, HEX);
+  Serial.print(" Len: ");
+  Serial.print(frame.length);
+  Serial.print(" Data: 0x");
+  for (int count = 0; count < frame.length; count++) {
+      Serial.print(frame.data.bytes[count], HEX);
+      Serial.print(" ");
+  }
+  Serial.print("\r\n");
 }
 
 void randomNoise() {
@@ -138,8 +159,8 @@ void loop() {
   digitalWrite(DS5, !pressed);
   
   if (pressed != pose.ebrake) {
-    //newData = true;
-    //pose.ebrake = pressed;
+    newData = true;
+    pose.ebrake = pressed;
     randomNoise();
   }
 
@@ -185,6 +206,12 @@ void loop() {
     Serial3.print(",");
     Serial3.print(pose.menu);
     Serial3.print('\n');
+
+    // port 0 = left trigger
+    pot.setResistance(0, pose.brakes);
+
+    // port 1 = right trigger
+    pot.setResistance(1, pose.accelerator);
 
     newData = false;
   }
