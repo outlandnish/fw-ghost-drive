@@ -12,12 +12,14 @@ bool CANProcessor::checkBus(CANRaw *bus) {
   CAN_FRAME frame;
   if (bus->available() > 0) {
     bus->read(frame);
-    processFrame(frame);
+    return processFrame(frame);
   }
+  return false;
 }
 
 bool CANProcessor::processFrame(CAN_FRAME &frame) {
   bool newData = false;
+  
   if (frame.id == 0xD0) {
     // steering
     int16_t steering = frame.data.bytes[1] << 8 | frame.data.bytes[0];
@@ -62,4 +64,6 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
 
     pose.ebrake = ebrake;
   }
+
+  return newData;
 }
