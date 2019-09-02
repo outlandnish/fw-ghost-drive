@@ -1,9 +1,10 @@
-# Macchina M2 CAN Forwarder
+# Macchina M2 HID Emulator for Xbox Adaptive Controller
 
-Parses data from the Macchina M2 CAN transceivers and forwards along over UART.
-This project is used as the first stage of using car data to control an Xbox controller
+Wow that's a mouthful of a name!
 
-The project is currently setup to work with a Subaru BRZ. Future improvements: load a DBC file with signal definitions.
+This firmware lets the Macchina M2 act as an HID Joystick using data from a car's CAN bus. When paired with an Xbox Adaptive Controller, it let's you play Xbox or PC games using your 🚗
+
+The project is setup to work with a Subaru BRZ. Future improvements: load a DBC file with signal definitions to work with any car
 
 ## Supported Signals
 
@@ -12,3 +13,5 @@ The project is currently setup to work with a Subaru BRZ. Future improvements: l
 * Clutch Engaged
 * Steering Wheel Angle
 * E-brake Engaged
+
+Future improvements: custom device to get gear or use cruise control stalk as gear up/down
