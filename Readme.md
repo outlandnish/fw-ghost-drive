@@ -1,6 +1,4 @@
-# Macchina M2 HID Emulator for Xbox Adaptive Controller
-
-Wow that's a mouthful of a name!
+# M2 HID / Xbox Controller
 
 This firmware lets the Macchina M2 act as an HID Joystick using data from a car's CAN bus. When paired with an Xbox Adaptive Controller, it let's you play Xbox or PC games using your 🚗
 
