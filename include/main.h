@@ -5,6 +5,7 @@
 #include <Joystick.h>
 #include <Pose.h>
 #include <XboxButtons.h>
+#include <EmulationMode.h>
 
 // digital potentiometer
 McpDigitalPot pot = McpDigitalPot(SPI0_CS0, 10000.0);
@@ -16,9 +17,12 @@ CANProcessor can;
 // Joystick
 Joystick_* joystick;
 
+EmulationMode mode = EmulationMode::Xbox;
+
 void setupLightsAndButtons();
 void setupPotentiometers();
 void setupCAN();
 void setupJoystick();
 
 void updatePose(Pose pose);
+void toggleEmulationMode();

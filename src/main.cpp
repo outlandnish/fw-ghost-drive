@@ -18,6 +18,9 @@ void setup() {
 
   // setup CAN
   setupCAN();
+
+  // change mode when button is pressed
+  attachInterrupt(Button2, toggleEmulationMode, FALLING);
 }
 
 void loop() {
@@ -45,13 +48,27 @@ void setupLightsAndButtons() {
   digitalWrite(DS5, HIGH);
   digitalWrite(DS6, HIGH);
   digitalWrite(DS7_RED, HIGH);
-  digitalWrite(DS7_GREEN, HIGH);
+  digitalWrite(DS7_GREEN, LOW);
   digitalWrite(DS7_BLUE, HIGH);
 }
 
 void setupJoystick() {
-  joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, true, false, false, false, false, false, false, false, false, false);
-  joystick->setXAxisRange(-900, 900);
+  if (joystick != nullptr)
+    joystick->end();
+    
+  switch (mode) {
+    case EmulationMode::Xbox:
+      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, false, false, false, false, false, false, false, false, false, false);
+      joystick->setXAxisRange(-900, 900);
+    break;
+    case EmulationMode::PC:
+      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, false, false, false, false, false, false, false, false, true, true, true);
+      joystick->setSteeringRange(-900, 900);
+      joystick->setThrottleRange(0, 255);
+      joystick->setBrakeRange(0, 100);
+    break;
+  }
+
   joystick->begin(false);
 }
 
@@ -84,14 +101,24 @@ void setupCAN() {
 }
 
 void updatePose(Pose pose) {
-  // port 0 = left trigger
-  pot.setResistance(0, pose.brakes);
+  switch (mode) {
+    case EmulationMode::Xbox:
+      // port 0 = left trigger
+      pot.setResistance(0, pose.brakes);
 
-  // port 1 = right trigger
-  pot.setResistance(1, pose.accelerator);
+      // port 1 = right trigger
+      pot.setResistance(1, pose.accelerator);
 
-  // steering
-  joystick->setXAxis(pose.steering);
+      // steering
+      joystick->setXAxis(pose.steering);
+      break;
+    case EmulationMode::PC:
+      // steering, accelerator, and brakes
+      joystick->setSteering(pose.steering);
+      joystick->setAccelerator(pose.accelerator);
+      joystick->setBrake(pose.brakes);
+      break;
+  }
 
   // clutch
   pose.clutch ? joystick->pressButton(XboxButtons::LEFT_BUMPER) : joystick->releaseButton(XboxButtons::LEFT_BUMPER);
@@ -108,5 +135,25 @@ void updatePose(Pose pose) {
   // rewind: remap X2 on Adaptive Controller to Y
   pose.rewind ? joystick->pressButton(XboxButtons::LEFT_X2) : joystick->releaseButton(XboxButtons::LEFT_X2);
 
+  // update joystick state
   joystick->sendState();
+}
+
+void toggleEmulationMode() {
+  switch (mode) {
+    case EmulationMode::Xbox:
+      mode = EmulationMode::PC;
+      digitalWrite(DS7_GREEN, LOW);
+      digitalWrite(DS7_BLUE, HIGH);
+
+      setupJoystick();
+      break;
+    case EmulationMode::PC:
+      mode = EmulationMode::Xbox;
+      digitalWrite(DS7_GREEN, HIGH);
+      digitalWrite(DS7_BLUE, LOW);
+
+      setupJoystick();
+      break;
+  }
 }
