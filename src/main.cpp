@@ -103,11 +103,11 @@ void setupCAN() {
 void updatePose(Pose pose) {
   switch (mode) {
     case EmulationMode::Xbox:
-      // port 0 = left trigger
-      pot.setResistance(0, pose.brakes);
+      // port 1 = left trigger
+      pot.setResistance(1, pose.brakes);
 
-      // port 1 = right trigger
-      pot.setResistance(1, pose.accelerator);
+      // port 0 = right trigger
+      pot.setResistance(0, pose.accelerator);
 
       // steering
       joystick->setXAxis(pose.steering);
@@ -144,14 +144,14 @@ void toggleEmulationMode() {
     case EmulationMode::Xbox:
       mode = EmulationMode::PC;
       digitalWrite(DS7_GREEN, LOW);
-      digitalWrite(DS7_BLUE, HIGH);
+      digitalWrite(DS7_RED, HIGH);
 
       setupJoystick();
       break;
     case EmulationMode::PC:
       mode = EmulationMode::Xbox;
       digitalWrite(DS7_GREEN, HIGH);
-      digitalWrite(DS7_BLUE, LOW);
+      digitalWrite(DS7_RED, LOW);
 
       setupJoystick();
       break;

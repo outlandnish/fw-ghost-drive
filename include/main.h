@@ -8,8 +8,8 @@
 #include <EmulationMode.h>
 
 // digital potentiometer
-McpDigitalPot pot = McpDigitalPot(SPI0_CS0, 10000.0);
-float resistance = 9760.0;        // 9.76 kohm
+float resistance = 9760.0; // 9.76 kohm - needs to be calibrated for each digital pot
+McpDigitalPot pot = McpDigitalPot(SPI0_CS0, resistance);
 
 // CAN interfaces
 CANProcessor can;
