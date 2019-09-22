@@ -11,9 +11,12 @@ bool CANProcessor::newVehicleData() {
 bool CANProcessor::checkBus(CANRaw *bus) {
   CAN_FRAME frame;
   if (bus->available() > 0) {
+    digitalWrite(DS2, LOW);
+
     bus->read(frame);
     return processFrame(frame);
   }
+  digitalWrite(DS2, HIGH);
   return false;
 }
 
@@ -24,6 +27,9 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
     // steering
     int16_t steering = frame.data.bytes[1] << 8 | frame.data.bytes[0];
 
+    //SerialUSB.print("Steering: ");
+    //SerialUSB.println(steering);
+
     if (steering != pose.steering) {
       newData = true;
       pose.steering = steering;
@@ -32,6 +38,9 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
   else if (frame.id == 0xD1) {
     // brake pedal pressure
     uint8_t brakes = frame.data.bytes[2];
+
+    // SerialUSB.print("Brakes: ");
+    // SerialUSB.println(brakes);
 
     if (brakes != pose.brakes) {
       newData = true;
@@ -48,6 +57,9 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
     
     pose.accelerator = accelerator;
     pose.clutch = clutch;
+
+    //SerialUSB.print("Accelerator: ");
+    //SerialUSB.println(accelerator);
   }
   else if (frame.id == 0x141) {
     // TODO: transmission (we can only see if we are in gear for manual BRZs)

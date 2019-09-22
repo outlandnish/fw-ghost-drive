@@ -14,19 +14,27 @@ void setup() {
   setupJoystick();
 
   // start SPI communication to the MCP4261
-  setupPotentiometers();
+  //setupPotentiometers();
 
   // setup CAN
   setupCAN();
 
   // change mode when button is pressed
-  attachInterrupt(Button2, toggleEmulationMode, FALLING);
+  //attachInterrupt(Button2, toggleEmulationMode, FALLING);
+
+  SerialUSB.println("Ready");
 }
 
 void loop() {
   if (can.newVehicleData()) {
     updatePose(can.pose);
   }
+
+  // Pose pose;
+  // pose.accelerator = rand() % 255;
+  // pose.brakes = rand() % 60;
+  // pose.steering = rand() % 11200 - 5600;
+  // updatePose(pose);
 }
 
 void setupLightsAndButtons() {
@@ -53,19 +61,16 @@ void setupLightsAndButtons() {
 }
 
 void setupJoystick() {
-  if (joystick != nullptr)
-    joystick->end();
-    
   switch (mode) {
     case EmulationMode::Xbox:
       joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, false, false, false, false, false, false, false, false, false, false);
       joystick->setXAxisRange(-900, 900);
     break;
     case EmulationMode::PC:
-      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, false, false, false, false, false, false, false, false, true, true, true);
-      joystick->setSteeringRange(-900, 900);
-      joystick->setThrottleRange(0, 255);
-      joystick->setBrakeRange(0, 100);
+      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, true, true, false, false, false, false, false, false, false, false);
+      joystick->setXAxisRange(-5600, 5600);
+      joystick->setYAxisRange(0, 255);
+      joystick->setZAxisRange(0, 60);
     break;
   }
 
@@ -101,6 +106,7 @@ void setupCAN() {
 }
 
 void updatePose(Pose pose) {
+  SerialUSB.println(pose.steering);
   switch (mode) {
     case EmulationMode::Xbox:
       // port 1 = left trigger
@@ -114,9 +120,9 @@ void updatePose(Pose pose) {
       break;
     case EmulationMode::PC:
       // steering, accelerator, and brakes
-      joystick->setSteering(pose.steering);
-      joystick->setAccelerator(pose.accelerator);
-      joystick->setBrake(pose.brakes);
+      joystick->setXAxis(pose.steering);
+      joystick->setYAxis(255 - pose.accelerator);
+      joystick->setZAxis(pose.brakes);
       break;
   }
 

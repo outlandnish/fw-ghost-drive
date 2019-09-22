@@ -17,7 +17,7 @@ CANProcessor can;
 // Joystick
 Joystick_* joystick;
 
-EmulationMode mode = EmulationMode::Xbox;
+EmulationMode mode = EmulationMode::PC;
 
 void setupLightsAndButtons();
 void setupPotentiometers();

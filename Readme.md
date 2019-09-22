@@ -12,6 +12,13 @@ The project is setup to work with a Subaru BRZ. Future improvements: load a DBC 
 * Steering Wheel Angle
 * E-brake Engaged
 
+The CAN signals currently setup have been tested on:
+
+* 2014 Subaru BRZ
+* 2015 Subaru Forester
+
+It should work with any modern Subaru. If you have a different vehicle, you'll need to reverse engineer the CAN signals and add them to `CANProcessor.h`
+
 Future improvements: custom device to get gear or use cruise control stalk as gear up/down
 
 ## Setup
