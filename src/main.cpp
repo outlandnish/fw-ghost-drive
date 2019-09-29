@@ -97,11 +97,12 @@ void setupCAN() {
 }
 
 void updatePose(Pose pose) {
-  SerialUSB.println(pose.steering);
+  float scaledAccel, scaledBrakes;
+  
   switch (mode) {
     case EmulationMode::Xbox:
-      float scaledAccel = accelScaler * (float)pose.accelerator;
-      float scaledBrakes = brakeScaler * (float)pose.brakes;
+      scaledAccel = accelScaler * (float)pose.accelerator;
+      scaledBrakes = brakeScaler * (float)pose.brakes;
 
       // port 1 = left trigger
       pot.setResistance(1, scaledBrakes);
