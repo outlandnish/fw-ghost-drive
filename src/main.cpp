@@ -14,13 +14,13 @@ void setup() {
   setupJoystick();
 
   // start SPI communication to the MCP4261
-  //setupPotentiometers();
+  setupPotentiometers();
 
   // setup CAN
   setupCAN();
 
   // change mode when button is pressed
-  //attachInterrupt(Button2, toggleEmulationMode, FALLING);
+  attachInterrupt(Button2, toggleEmulationMode, FALLING);
 
   SerialUSB.println("Ready");
 }
@@ -29,12 +29,6 @@ void loop() {
   if (can.newVehicleData()) {
     updatePose(can.pose);
   }
-
-  // Pose pose;
-  // pose.accelerator = rand() % 255;
-  // pose.brakes = rand() % 60;
-  // pose.steering = rand() % 11200 - 5600;
-  // updatePose(pose);
 }
 
 void setupLightsAndButtons() {
@@ -98,7 +92,7 @@ void setupCAN() {
 
 void updatePose(Pose pose) {
   float scaledAccel, scaledBrakes;
-  
+
   switch (mode) {
     case EmulationMode::Xbox:
       scaledAccel = accelScaler * (float)pose.accelerator;
