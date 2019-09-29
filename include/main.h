@@ -7,9 +7,16 @@
 #include <XboxButtons.h>
 #include <EmulationMode.h>
 
+#define STEERING_RANGE 5600
+#define BRAKE_MAX 100
+#define ACCEL_MAX 255
+
 // digital potentiometer
 float resistance = 9760.0; // 9.76 kohm - needs to be calibrated for each digital pot
 McpDigitalPot pot = McpDigitalPot(SPI0_CS0, resistance);
+
+float accelScaler = 255.0 / (float)ACCEL_MAX;
+float brakeScaler = 255.0 / (float)BRAKE_MAX;
 
 // CAN interfaces
 CANProcessor can;

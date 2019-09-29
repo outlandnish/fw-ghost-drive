@@ -61,19 +61,10 @@ void setupLightsAndButtons() {
 }
 
 void setupJoystick() {
-  switch (mode) {
-    case EmulationMode::Xbox:
-      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, false, false, false, false, false, false, false, false, false, false);
-      joystick->setXAxisRange(-900, 900);
-    break;
-    case EmulationMode::PC:
-      joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, true, true, false, false, false, false, false, false, false, false);
-      joystick->setXAxisRange(-5600, 5600);
-      joystick->setYAxisRange(0, 255);
-      joystick->setZAxisRange(0, 60);
-    break;
-  }
-
+  joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, true, true, false, false, false, false, false, false, false, false);
+  joystick->setXAxisRange(-STEERING_RANGE, STEERING_RANGE);
+  joystick->setYAxisRange(0, ACCEL_MAX);
+  joystick->setZAxisRange(0, BRAKE_MAX);
   joystick->begin(false);
 }
 
@@ -109,11 +100,14 @@ void updatePose(Pose pose) {
   SerialUSB.println(pose.steering);
   switch (mode) {
     case EmulationMode::Xbox:
+      float scaledAccel = accelScaler * (float)pose.accelerator;
+      float scaledBrakes = brakeScaler * (float)pose.brakes;
+
       // port 1 = left trigger
-      pot.setResistance(1, pose.brakes);
+      pot.setResistance(1, scaledBrakes);
 
       // port 0 = right trigger
-      pot.setResistance(0, pose.accelerator);
+      pot.setResistance(0, scaledAccel);
 
       // steering
       joystick->setXAxis(pose.steering);
@@ -121,7 +115,8 @@ void updatePose(Pose pose) {
     case EmulationMode::PC:
       // steering, accelerator, and brakes
       joystick->setXAxis(pose.steering);
-      joystick->setYAxis(255 - pose.accelerator);
+
+      joystick->setYAxis(ACCEL_MAX - pose.accelerator);
       joystick->setZAxis(pose.brakes);
       break;
   }
@@ -151,15 +146,11 @@ void toggleEmulationMode() {
       mode = EmulationMode::PC;
       digitalWrite(DS7_GREEN, LOW);
       digitalWrite(DS7_RED, HIGH);
-
-      setupJoystick();
       break;
     case EmulationMode::PC:
       mode = EmulationMode::Xbox;
       digitalWrite(DS7_GREEN, HIGH);
       digitalWrite(DS7_RED, LOW);
-
-      setupJoystick();
       break;
   }
 }
