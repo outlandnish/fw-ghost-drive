@@ -110,7 +110,6 @@ void updatePose(Pose pose) {
     case EmulationMode::PC:
       // steering, accelerator, and brakes
       joystick->setXAxis(pose.steering);
-
       joystick->setYAxis(ACCEL_MAX - pose.accelerator);
       joystick->setZAxis(pose.brakes);
       break;

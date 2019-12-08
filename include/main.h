@@ -7,7 +7,7 @@
 #include <XboxButtons.h>
 #include <EmulationMode.h>
 
-#define STEERING_RANGE 5600
+#define STEERING_RANGE 4600
 #define BRAKE_MAX 100
 #define ACCEL_MAX 255
 
@@ -24,7 +24,7 @@ CANProcessor can;
 // Joystick
 Joystick_* joystick;
 
-EmulationMode mode = EmulationMode::PC;
+EmulationMode mode = EmulationMode::Xbox;
 
 void setupLightsAndButtons();
 void setupPotentiometers();
