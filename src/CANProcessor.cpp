@@ -26,19 +26,9 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
   if (frame.id == 0xD0) {
     // steering
     int16_t steering = frame.data.bytes[1] << 8 | frame.data.bytes[0];
-    SerialUSB.print("ID: 0x");
-    SerialUSB.print(frame.id, HEX);
-    SerialUSB.print(" Len: ");
-    SerialUSB.print(frame.length);
-    SerialUSB.print(" Data: 0x");
-    for (int count = 0; count < frame.length; count++) {
-        SerialUSB.print(frame.data.bytes[count], HEX);
-        SerialUSB.print(" ");
-    }
-    SerialUSB.print("\r\n");
 
-    SerialUSB.print("Steering: ");
-    SerialUSB.println(steering);  
+    // SerialUSB.print("Steering: ");
+    // SerialUSB.println(steering);
 
     if (steering != pose.steering) {
       newData = true;
@@ -49,8 +39,8 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
     // brake pedal pressure
     uint8_t brakes = frame.data.bytes[2];
 
-    SerialUSB.print("Brakes: ");
-    SerialUSB.println(brakes);
+    // SerialUSB.print("Brakes: ");
+    // SerialUSB.println(brakes);
 
     if (brakes != pose.brakes) {
       newData = true;
