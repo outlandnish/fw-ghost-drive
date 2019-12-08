@@ -26,6 +26,9 @@ Joystick_* joystick;
 
 EmulationMode mode = EmulationMode::Xbox;
 
+// Gear
+Gear lastGear;
+
 void setupLightsAndButtons();
 void setupPotentiometers();
 void setupCAN();

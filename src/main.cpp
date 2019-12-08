@@ -55,7 +55,7 @@ void setupLightsAndButtons() {
 }
 
 void setupJoystick() {
-  joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 8, 0, true, true, true, false, false, false, false, false, false, false, false);
+  joystick = new Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, 10, 0, true, true, true, false, false, false, false, false, false, false, false);
   joystick->setXAxisRange(-STEERING_RANGE, STEERING_RANGE);
   joystick->setYAxisRange(0, ACCEL_MAX);
   joystick->setZAxisRange(0, BRAKE_MAX);
@@ -106,29 +106,46 @@ void updatePose(Pose pose) {
 
       // steering
       joystick->setXAxis(pose.steering);
+      
+      // clutch
+      pose.clutch ? joystick->pressButton(XboxButtons::LEFT_BUMPER) : joystick->releaseButton(XboxButtons::LEFT_BUMPER);
+
+      // e-brake
+      pose.ebrake ? joystick->pressButton(XboxButtons::A) : joystick->releaseButton(XboxButtons::A);
+
+      // upshift
+      pose.upshift ? joystick->pressButton(XboxButtons::B) : joystick->releaseButton(XboxButtons::B);
+
+      // downshift: remap X1 on Adaptive Controller to X
+      pose.downshift ? joystick->pressButton(XboxButtons::LEFT_X1) : joystick->releaseButton(XboxButtons::LEFT_X1);
+
+      // rewind: remap X2 on Adaptive Controller to Y
+      pose.rewind ? joystick->pressButton(XboxButtons::LEFT_X2) : joystick->releaseButton(XboxButtons::LEFT_X2);
       break;
     case EmulationMode::PC:
       // steering, accelerator, and brakes
       joystick->setXAxis(pose.steering);
       joystick->setYAxis(ACCEL_MAX - pose.accelerator);
       joystick->setZAxis(pose.brakes);
+
+      // gear
+      if (pose.gear != lastGear) {
+        // release last gear button
+        joystick->releaseButton(lastGear);
+
+        // press and store new gear
+        joystick->pressButton(pose.gear);
+        lastGear = pose.gear;
+      }
+
+      // clutch
+      pose.clutch ? joystick->pressButton(8) : joystick->releaseButton(8);
+
+      // e-brake
+      pose.ebrake ? joystick->pressButton(9) : joystick->releaseButton(9);
+      
       break;
   }
-
-  // clutch
-  pose.clutch ? joystick->pressButton(XboxButtons::LEFT_BUMPER) : joystick->releaseButton(XboxButtons::LEFT_BUMPER);
-
-  // e-brake
-  pose.ebrake ? joystick->pressButton(XboxButtons::A) : joystick->releaseButton(XboxButtons::A);
-
-  // upshift
-  pose.upshift ? joystick->pressButton(XboxButtons::B) : joystick->releaseButton(XboxButtons::B);
-
-  // downshift: remap X1 on Adaptive Controller to X
-  pose.downshift ? joystick->pressButton(XboxButtons::LEFT_X1) : joystick->releaseButton(XboxButtons::LEFT_X1);
-
-  // rewind: remap X2 on Adaptive Controller to Y
-  pose.rewind ? joystick->pressButton(XboxButtons::LEFT_X2) : joystick->releaseButton(XboxButtons::LEFT_X2);
 
   // update joystick state
   joystick->sendState();

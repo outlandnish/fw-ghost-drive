@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <Gear.h>
 
 struct Pose {
   int16_t steering;
@@ -12,4 +13,5 @@ struct Pose {
   bool rewind;
   bool view;
   bool menu;
+  Gear gear = Gear::Neutral;
 };
