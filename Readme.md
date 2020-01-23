@@ -1,6 +1,6 @@
 # M2 HID / Xbox Controller
 
-This firmware lets the Macchina M2 act as an HID Joystick using data from a car's CAN bus. When paired with an Xbox Adaptive Controller, it let's you play Xbox or PC games using your car!
+This firmware lets the Macchina M2 act as an HID Joystick using data from a car's CAN bus. When paired with an Xbox Adaptive Controller, it lets you play Xbox or PC games using your car!
 
 The project is setup to work with a Subaru BRZ. Future improvements: load a DBC file with signal definitions to work with any car
 
