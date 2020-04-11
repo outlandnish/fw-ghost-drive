@@ -1,20 +1,18 @@
 #include <main.h>
 
 void setup() {
+  // setup HID Joystick
+  setupJoystick();
+
   // start serial
   SerialUSB.begin(115200);
-
-  delay(50);
   SerialUSB.println("Initializing...");
   
   // setup the M2 LEDs and buttons
   setupLightsAndButtons();
 
-  // setup HID Joystick
-  setupJoystick();
-
   // start SPI communication to the MCP4261
-  setupPotentiometers();
+  // setupPotentiometers();
 
   // setup CAN
   setupCAN();
@@ -26,9 +24,20 @@ void setup() {
 }
 
 void loop() {
+  gearSensor.process();
+
+  // if we have any new CAN bus data
   if (can.newVehicleData()) {
+    Pose pose = can.pose;
+    pose.gear = gearSensor.calculateGear(can.pose);
     updatePose(can.pose);
   }
+
+  // if we have any telemetry updates to make
+  // if (SerialUSB.available())
+    // processTelemetry(SerialUSB.readStringUntil('\n').c_str());
+
+  // can.updateDashboard();
 }
 
 void setupLightsAndButtons() {
@@ -92,6 +101,18 @@ void setupCAN() {
 
 void updatePose(Pose pose) {
   float scaledAccel, scaledBrakes;
+
+  SerialUSB.print("Pose:\tAccel: ");
+  SerialUSB.print(pose.accelerator);
+  SerialUSB.print("\tBrakes: ");
+  SerialUSB.print(pose.brakes);
+  SerialUSB.print("\tSteering: ");
+  SerialUSB.print(pose.steering);
+  SerialUSB.print("\tClutch: ");
+  SerialUSB.print(pose.clutch);
+  SerialUSB.print("\tE-brake: ");
+  SerialUSB.print(pose.ebrake);
+  SerialUSB.println("");
 
   switch (mode) {
     case EmulationMode::Xbox:
@@ -164,4 +185,12 @@ void toggleEmulationMode() {
       digitalWrite(DS7_RED, LOW);
       break;
   }
+}
+
+void processTelemetry(std::string data) {
+  digitalWrite(DS5, LOW);
+  std::vector<std::string> parts;
+  tokenize(data, ',', parts);
+  can.updateTelemetry(std::stof(parts[0]), std::stoi(parts[1]));
+  digitalWrite(DS5, HIGH);
 }

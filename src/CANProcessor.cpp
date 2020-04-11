@@ -1,5 +1,26 @@
 #include <CANProcessor.h>
 
+void CANProcessor::updateTelemetry(float speed, int rpm) {
+  _speed = speed;
+  _rpm = rpm;
+}
+
+void CANProcessor::updateDashboard() {
+  lastTransmissionFrame.data.byte[4] = _rpm % 256;
+  lastTransmissionFrame.data.byte[5] = _rpm / 256 + 0x80;
+  Can0.sendFrame(lastTransmissionFrame);
+
+  union {
+    uint16_t convertedSpeed;
+    uint8_t bytes[2];
+  } speedData;
+
+  speedData.convertedSpeed = round(_speed / 0.05747);
+  lastBrakeSpeedFrame.data.byte[0] = speedData.bytes[0];
+  lastBrakeSpeedFrame.data.byte[1] = speedData.bytes[1];
+  Can0.sendFrame(lastBrakeSpeedFrame);
+}
+
 bool CANProcessor::newVehicleData() {
   bool newData = false;
   newData = newData || checkBus(&Can0);
@@ -27,20 +48,16 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
     // steering
     int16_t steering = frame.data.bytes[1] << 8 | frame.data.bytes[0];
 
-    // SerialUSB.print("Steering: ");
-    // SerialUSB.println(steering);
-
     if (steering != pose.steering) {
       newData = true;
       pose.steering = steering;
     }
   }
   else if (frame.id == 0xD1) {
+    lastBrakeSpeedFrame = frame;
+
     // brake pedal pressure
     uint8_t brakes = frame.data.bytes[2];
-
-    // SerialUSB.print("Brakes: ");
-    // SerialUSB.println(brakes);
 
     if (brakes != pose.brakes) {
       newData = true;
@@ -57,15 +74,10 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
     
     pose.accelerator = accelerator;
     pose.clutch = clutch;
-
-    //SerialUSB.print("Accelerator: ");
-    //SerialUSB.println(accelerator);
   }
   else if (frame.id == 0x141) {
+    lastTransmissionFrame = frame;
     // TODO: transmission (we can only see if we are in gear for manual BRZs)
-  }
-  else if (frame.id == 0x144) {
-    // TODO: use cruise control stalk up/down as replacement for gear shifts?
   }
   else if (frame.id == 0x152) {
     // e-brake engaged or not

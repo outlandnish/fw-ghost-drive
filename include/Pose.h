@@ -13,5 +13,7 @@ struct Pose {
   bool rewind;
   bool view;
   bool menu;
+  bool inGear;
+  bool inReverse;
   Gear gear = Gear::Neutral;
 };
