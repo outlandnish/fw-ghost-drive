@@ -1,64 +1,71 @@
 #include <GearSensor.h>
 
 bool GearSensor::setup() {
-  pinMode(ODD_RESET, OUTPUT);
-  pinMode(EVEN_RESET, OUTPUT);
+#if defined(LOCAL_SENSOR)
+  if (!fxos.begin()) {
+    Serial.println("Failed to find sensor");
+    while (1) delay(10);
+  }
 
-  // shutdown both VLX6180s
-  digitalWrite(ODD_RESET, LOW);
-  digitalWrite(EVEN_RESET, LOW);
-  delay(1000);
+  for (int i = 0; i < NUM_GEAR_UPDATES; i++)
+    updates[i] = Gear::Neutral;
 
-  // turn on first VLX6180 - (1st / 3rd / 5th)
-  digitalWrite(ODD_RESET, HIGH);
-  delay(10);
-
-  // if we failed to startup the sensor
-  if (!odds.begin(&Wire1))
-    return false;
-
-  // change I2C address so it doesn't interfere with the other sensor
-  odds.setAddress(ODDS_ADDRESS);
-  delay(50);
-
-  // if we fail to connect after changing address
-  if (!odds.begin(&Wire1, ODDS_ADDRESS))
-    return false;
-
-  // turn on second VLX6180 - (2nd / 4th / 6th)
-  digitalWrite(EVEN_RESET, HIGH);
-  delay(10);
-
-  if (!evens.begin(&Wire1))
-    return false;
-
-  return true;
+  accelerometer = fxos.getAccelerometerSensor();
+#else
+  Serial3.begin(115200);
+#endif
 }
 
-void GearSensor::process() {  
-  if (millis() - lastGearUpdate >= GEAR_UPDATE_DELTA) {
-    evensValue = evens.readRange();
-    evensStatus = evens.readRangeStatus();
+void GearSensor::process() {
+#if defined(LOCAL_SENSOR)
+  sensors_event_t accel;
+  accelerometer->getEvent(&accel);
 
-    oddsValue = odds.readRange();
-    oddsStatus = odds.readRangeStatus();
+  Gear current;
 
-    lastGearUpdate = millis();
-  }
-}
+  gravity.acceleration.x = _alpha * gravity.acceleration.x + (1 - _alpha) * accel.acceleration.x;
+  gravity.acceleration.y = _alpha * gravity.acceleration.y + (1 - _alpha) * accel.acceleration.y;
+  gravity.acceleration.z = _alpha * gravity.acceleration.z + (1 - _alpha) * accel.acceleration.z;
 
-Gear GearSensor::calculateGear(Pose pose) {
-  if (pose.inReverse)  return Gear::Reverse;
-  else if (!pose.inGear) return Gear::Neutral;
-
-  if (evensStatus == VL6180X_ERROR_NONE) {
-
-  }
-
-  if (oddsStatus == VL6180X_ERROR_NONE) {
-
+  if (gravity.acceleration.y <= -3) {
+    if (gravity.acceleration.x <= -0.80)
+      current = Gear::Second;
+    else if (gravity.acceleration.x <= 0.5)
+      current = Gear::Fourth;
+    else
+      current = Gear::Sixth;
   }
 
-  // default
-  return Gear::Neutral;
+  else if (gravity.acceleration.y >= -1.5) {
+    if (gravity.acceleration.x <= -1)
+      current = Gear::First;
+    else if (gravity.acceleration.x <= 0.25)
+      current = Gear::Third;
+    else
+      current = Gear::Fifth;
+  }
+
+  else
+    current = Gear::Neutral;
+  
+  updates[index] = current;
+  index++;
+  index %= NUM_GEAR_UPDATES;
+
+  bool stable = true;
+  for (int i = 0; i++; i < NUM_GEAR_UPDATES)
+    if (updates[i] != current) {
+      stable = false;
+      break;
+    }
+  
+  if (stable && current != gear) {
+    gear = current;
+  }
+#else
+  while (Serial3.available()) {
+    buffer = Serial3.read();
+    gear = (Gear)(buffer - '0');
+  }
+#endif
 }

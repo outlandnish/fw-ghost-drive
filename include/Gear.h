@@ -1,13 +1,13 @@
 #pragma once
 #include <stdint.h>
 
-enum Gear : int8_t {
-  Reverse,
-  Neutral,
+enum Gear : uint8_t {
+  Neutral = 0,
   First,
   Second,
   Third,
   Fourth,
   Fifth,
-  Sixth
+  Sixth,
+  Reverse
 };

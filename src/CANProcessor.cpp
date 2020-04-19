@@ -77,7 +77,26 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
   }
   else if (frame.id == 0x141) {
     lastTransmissionFrame = frame;
-    // TODO: transmission (we can only see if we are in gear for manual BRZs)
+    bool inGear = frame.data.bytes[5] == 0x80;
+
+    if (pose.inGear != inGear) {
+      newData = true;
+      pose.inGear = inGear;
+      SerialUSB.print("In gear: ");
+      SerialUSB.println(pose.inGear);
+    }
+  }
+  else if (frame.id == 0x144) {
+    // cruise control stalk (used for upshift / downshift)
+    uint8_t cruiseControlStalk = frame.data.byte[0];
+
+    bool upshift = cruiseControlStalk == 0xD0;
+    bool downshift = cruiseControlStalk == 0xC8;
+    // if (pose.upshift != upshift || pose.downshift != downshift) {
+    //   pose.upshift = upshift;
+    //   pose.downshift = downshift;
+    //   newData = true;
+    // }
   }
   else if (frame.id == 0x152) {
     // e-brake engaged or not

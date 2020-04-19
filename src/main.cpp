@@ -20,17 +20,22 @@ void setup() {
   // change mode when button is pressed
   attachInterrupt(Button2, toggleEmulationMode, FALLING);
 
+  gearSensor.setup();
+
   SerialUSB.println("Ready");
 }
 
 void loop() {
   gearSensor.process();
+  Gear gear = gearSensor.getGear();
 
   // if we have any new CAN bus data
-  if (can.newVehicleData()) {
+  if (can.newVehicleData() || gear != lastGear) {
     Pose pose = can.pose;
-    pose.gear = gearSensor.calculateGear(can.pose);
-    updatePose(can.pose);
+    pose.gear = gearSensor.getGear();
+
+    updatePose(pose);
+    lastPose = pose;
   }
 
   // if we have any telemetry updates to make
@@ -69,6 +74,7 @@ void setupJoystick() {
   joystick->setYAxisRange(0, ACCEL_MAX);
   joystick->setZAxisRange(0, BRAKE_MAX);
   joystick->begin(false);
+  joystick->pressButton(buttonForGear(lastGear));
 }
 
 void setupPotentiometers() {
@@ -80,23 +86,16 @@ void setupPotentiometers() {
 
 void setupCAN() {
   digitalWrite(DS6, LOW);
-  SerialUSB.println("Doing Auto Baud scan on CAN0");
-  Can0.beginAutoSpeed();
-  SerialUSB.println("Doing Auto Baud scan on CAN1");
-  Can1.beginAutoSpeed();
+  Can0.begin(500000);
+  Can1.begin(500000);
   digitalWrite(DS7_BLUE, LOW);
 
   int filter;
-  //extended
-  for (filter = 0; filter < 3; filter++) {
-    Can0.setRXFilter(filter, 0, 0, true);
-    Can1.setRXFilter(filter, 0, 0, true);
-  }  
-  //standard
-  for (int filter = 3; filter < 7; filter++) {
-    Can0.setRXFilter(filter, 0, 0, false);
-    Can1.setRXFilter(filter, 0, 0, false);
-  }
+  Can0.setRXFilter(0, 0xD0, 0, false);
+  Can0.setRXFilter(1, 0xD1, 0, false);
+  Can0.setRXFilter(2, 0x140, 0, false);
+  Can0.setRXFilter(3, 0x144, 0, false);
+  Can0.setRXFilter(4, 0x152, 0, false);
 }
 
 void updatePose(Pose pose) {
@@ -112,6 +111,8 @@ void updatePose(Pose pose) {
   SerialUSB.print(pose.clutch);
   SerialUSB.print("\tE-brake: ");
   SerialUSB.print(pose.ebrake);
+  SerialUSB.print("\tGear: ");
+  SerialUSB.print(pose.gear);
   SerialUSB.println("");
 
   switch (mode) {
@@ -150,14 +151,19 @@ void updatePose(Pose pose) {
       joystick->setZAxis(pose.brakes);
 
       // gear
+      uint8_t button = buttonForGear(pose.gear);
       if (pose.gear != lastGear) {
-        // release last gear button
-        joystick->releaseButton(lastGear);
-
+        joystick->releaseButton(buttonForGear(lastGear));
         // press and store new gear
-        joystick->pressButton(pose.gear);
+        joystick->pressButton(button);
         lastGear = pose.gear;
       }
+
+      // upshift pressed
+      // pose.upshift ? joystick->pressButton(0) : joystick->releaseButton(0);
+
+      // downshift pressed
+      // pose.downshift ? joystick->pressButton(1) : joystick->releaseButton(1);
 
       // clutch
       pose.clutch ? joystick->pressButton(8) : joystick->releaseButton(8);
@@ -193,4 +199,8 @@ void processTelemetry(std::string data) {
   tokenize(data, ',', parts);
   can.updateTelemetry(std::stof(parts[0]), std::stoi(parts[1]));
   digitalWrite(DS5, HIGH);
+}
+
+uint8_t buttonForGear(Gear gear) {
+  return gear == gear == Gear::Reverse ? 8 : gear;
 }

@@ -1,28 +1,32 @@
 #pragma once
 #include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_VL6180X.h>
 #include <Pose.h>
 #include <Gear.h>
+// #define LOCAL_SENSOR
 
-#define ODD_RESET TXD3
-#define EVEN_RESET RXD3
+#if defined(LOCAL_SENSOR)
+  #include <Adafruit_FXOS8700.h>
+#endif;
 
-#define EVEN_ADDRESS VL6180X_DEFAULT_I2C_ADDR
-#define ODDS_ADDRESS (VL6180X_DEFAULT_I2C_ADDR + 1)
+#define NUM_GEAR_UPDATES 3
 
 class GearSensor {
-  Adafruit_VL6180X odds = Adafruit_VL6180X();
-  Adafruit_VL6180X evens = Adafruit_VL6180X();
-  uint32_t lastGearUpdate = millis();
-  uint32_t GEAR_UPDATE_DELTA = 50;  // milliseconds
+  char buffer;
+  Gear gear = Gear::Neutral;
 
-  uint8_t oddsValue, oddsStatus;
-  uint8_t evensValue, evensStatus;
+#if defined(LOCAL_SENSOR)
+  Adafruit_FXOS8700 fxos = Adafruit_FXOS8700(0x8700A, 0x8700B);
+  Adafruit_Sensor *accelerometer;
+  sensors_event_t gravity;
+  float _alpha = 0.05;
+
+  uint8_t index = 0;
+  Gear updates[NUM_GEAR_UPDATES];
+#endif
 
   public:
     bool setup();
     void process();
 
-    Gear calculateGear(Pose pose);
+    Gear getGear() { return gear; }
 };

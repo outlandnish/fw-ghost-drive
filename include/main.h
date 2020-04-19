@@ -14,7 +14,7 @@
 #include <vector>
 #include <algorithm>
 
-#define STEERING_RANGE 4600
+#define STEERING_RANGE 720
 #define BRAKE_MAX 100
 #define ACCEL_MAX 255
 
@@ -37,7 +37,7 @@ Joystick_* joystick;
 EmulationMode mode = EmulationMode::Xbox;
 
 // Gear
-Gear lastGear;
+Gear lastGear = Gear::Neutral;
 
 void setupLightsAndButtons();
 void setupPotentiometers();
@@ -47,6 +47,10 @@ void setupJoystick();
 void updatePose(Pose pose);
 void processTelemetry(std::string data);
 void toggleEmulationMode();
+uint8_t buttonForGear(Gear gear);
+
+Pose lastPose;
+bool shouldReleaseGear = false;
 
 void tokenize(const std::string& s, const char delim, std::vector<std::string>& out)
 {
