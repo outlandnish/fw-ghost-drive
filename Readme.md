@@ -2,8 +2,8 @@
 
 Ditch the expensive sim racing rigs and use your car instead to control racing games on either your PC or Xbox. This firmware is designed for the Macchina M2. It reads CAN bus data from your car and acts as an HID Gamepad. When paired with an Xbox Adaptive Controller, you can use it with Xbox Ones as well.
 
-Full write up of the project here: https://outlandnish.com/blog/ditch-the-sim-rig-use-your-car-instead/
-Video demo of it in action: https://www.youtube.com/watch?v=qct7rrOwh6s
+* Full write up of the project here: https://outlandnish.com/blog/ditch-the-sim-rig-use-your-car-instead/
+* Video demo of it in action: https://www.youtube.com/watch?v=qct7rrOwh6s
 
 The project is setup to work with a Subaru BRZ. Future improvements: load a DBC file with signal definitions to work with any car
 
