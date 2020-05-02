@@ -19,8 +19,6 @@ The CAN signals currently setup have been tested on:
 
 It should work with any modern Subaru. If you have a different vehicle, you'll need to reverse engineer the CAN signals and add them to `CANProcessor.h`
 
-Future improvements: custom device to get gear or use cruise control stalk as gear up/down
-
 ## Setup
 
 This is a PlatformIO project and requires it to run. You can setup PlatformIO in VSCode or Atom pretty easily. More information at [PlatformIO](https://platformio.org)
