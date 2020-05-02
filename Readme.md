@@ -1,6 +1,8 @@
-# M2 HID / Xbox Controller
+# Ghost Drive - the Sim Racing Controller for Your Car
 
-This firmware lets the Macchina M2 act as an HID Joystick using data from a car's CAN bus. When paired with an Xbox Adaptive Controller, it lets you play Xbox or PC games using your car!
+Ditch the expensive sim racing rigs and use your car instead to control racing games on either your PC or Xbox. This firmware is designed for the Macchina M2. It reads CAN bus data from your car and acts as an HID Gamepad. When paired with an Xbox Adaptive Controller, you can use it with Xbox Ones as well.
+
+Full write up of the project here: https://outlandnish.com/blog/ditch-the-sim-rig-use-your-car-instead/
 
 The project is setup to work with a Subaru BRZ. Future improvements: load a DBC file with signal definitions to work with any car
 
