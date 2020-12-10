@@ -1,6 +1,8 @@
 # Ghost Drive - the Sim Racing Controller for Your Car
 
-Ditch the expensive sim racing rigs and use your car instead to control racing games on either your PC or Xbox. This firmware is designed for the Macchina M2. It reads CAN bus data from your car and acts as an HID Gamepad. When paired with an Xbox Adaptive Controller, you can use it with Xbox Ones as well.
+Ditch the expensive sim racing rigs and use your car instead to control racing games on either your PC or Xbox. This firmware is designed for the Macchina M2. It reads CAN bus data from your car and acts as an HID Gamepad. 
+
+Optionally, when paired with an Xbox Adaptive Controller, you can use it with Xbox Ones as well.
 
 * Full write up of the project here: https://outlandnish.com/hacks/ditch-the-sim-rig-use-your-car-instead/
 * Video demo of it in action: https://www.youtube.com/watch?v=qct7rrOwh6s
