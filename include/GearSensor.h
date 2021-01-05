@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <Pose.h>
 #include <Gear.h>
-// #define LOCAL_SENSOR
+#define LOCAL_SENSOR
 
 #if defined(LOCAL_SENSOR)
   #include <Adafruit_FXOS8700.h>

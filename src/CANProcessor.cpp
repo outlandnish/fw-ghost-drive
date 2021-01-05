@@ -6,10 +6,6 @@ void CANProcessor::updateTelemetry(float speed, int rpm) {
 }
 
 void CANProcessor::updateDashboard() {
-  lastTransmissionFrame.data.byte[4] = _rpm % 256;
-  lastTransmissionFrame.data.byte[5] = _rpm / 256 + 0x80;
-  Can0.sendFrame(lastTransmissionFrame);
-
   union {
     uint16_t convertedSpeed;
     uint8_t bytes[2];
@@ -19,6 +15,11 @@ void CANProcessor::updateDashboard() {
   lastBrakeSpeedFrame.data.byte[0] = speedData.bytes[0];
   lastBrakeSpeedFrame.data.byte[1] = speedData.bytes[1];
   Can0.sendFrame(lastBrakeSpeedFrame);
+
+  lastTransmissionFrame.data.byte[4] = _rpm % 256;
+  lastTransmissionFrame.data.byte[5] = _rpm / 256 + 0x80;
+
+  Can0.sendFrame(lastTransmissionFrame);
 }
 
 bool CANProcessor::newVehicleData() {
@@ -77,14 +78,14 @@ bool CANProcessor::processFrame(CAN_FRAME &frame) {
   }
   else if (frame.id == 0x141) {
     lastTransmissionFrame = frame;
-    bool inGear = frame.data.bytes[5] == 0x80;
+    // bool inGear = frame.data.bytes[5] == 0x80;
 
-    if (pose.inGear != inGear) {
-      newData = true;
-      pose.inGear = inGear;
-      SerialUSB.print("In gear: ");
-      SerialUSB.println(pose.inGear);
-    }
+    // if (pose.inGear != inGear) {
+    //   newData = true;
+    //   pose.inGear = inGear;
+    //   SerialUSB.print("In gear: ");
+    //   SerialUSB.println(pose.inGear);
+    // }
   }
   else if (frame.id == 0x144) {
     // cruise control stalk (used for upshift / downshift)

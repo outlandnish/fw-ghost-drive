@@ -21,7 +21,6 @@ void setup() {
   attachInterrupt(Button2, toggleEmulationMode, FALLING);
 
   gearSensor.setup();
-
   SerialUSB.println("Ready");
 }
 
@@ -30,17 +29,20 @@ void loop() {
   Gear gear = gearSensor.getGear();
 
   // if we have any new CAN bus data
-  if (can.newVehicleData() || gear != lastGear) {
+  if (can.newVehicleData()) {
+    updatePose(can.pose);
+    lastPose = can.pose;
+  }
+  else if (gear != lastGear) {
     Pose pose = can.pose;
     pose.gear = gearSensor.getGear();
-
-    updatePose(pose);
+    shiftToGear(pose.gear);
     lastPose = pose;
   }
 
-  // if we have any telemetry updates to make
+  // // if we have any telemetry updates to make
   // if (SerialUSB.available())
-    // processTelemetry(SerialUSB.readStringUntil('\n').c_str());
+  //   processTelemetry(SerialUSB.readStringUntil('\n').c_str());
 
   // can.updateDashboard();
 }
@@ -74,7 +76,6 @@ void setupJoystick() {
   joystick->setYAxisRange(0, ACCEL_MAX);
   joystick->setZAxisRange(0, BRAKE_MAX);
   joystick->begin(false);
-  joystick->pressButton(buttonForGear(lastGear));
 }
 
 void setupPotentiometers() {
@@ -101,19 +102,19 @@ void setupCAN() {
 void updatePose(Pose pose) {
   float scaledAccel, scaledBrakes;
 
-  SerialUSB.print("Pose:\tAccel: ");
-  SerialUSB.print(pose.accelerator);
-  SerialUSB.print("\tBrakes: ");
-  SerialUSB.print(pose.brakes);
-  SerialUSB.print("\tSteering: ");
-  SerialUSB.print(pose.steering);
-  SerialUSB.print("\tClutch: ");
-  SerialUSB.print(pose.clutch);
-  SerialUSB.print("\tE-brake: ");
-  SerialUSB.print(pose.ebrake);
-  SerialUSB.print("\tGear: ");
-  SerialUSB.print(pose.gear);
-  SerialUSB.println("");
+  // SerialUSB.print("Pose:\tAccel: ");
+  // SerialUSB.print(pose.accelerator);
+  // SerialUSB.print("\tBrakes: ");
+  // SerialUSB.print(pose.brakes);
+  // SerialUSB.print("\tSteering: ");
+  // SerialUSB.print(pose.steering);
+  // SerialUSB.print("\tClutch: ");
+  // SerialUSB.print(pose.clutch);
+  // SerialUSB.print("\tE-brake: ");
+  // SerialUSB.print(pose.ebrake);
+  // SerialUSB.print("\tGear: ");
+  // SerialUSB.print(pose.gear);
+  // SerialUSB.println("");
 
   switch (mode) {
     case EmulationMode::Xbox:
@@ -150,15 +151,6 @@ void updatePose(Pose pose) {
       joystick->setYAxis(ACCEL_MAX - pose.accelerator);
       joystick->setZAxis(pose.brakes);
 
-      // gear
-      uint8_t button = buttonForGear(pose.gear);
-      if (pose.gear != lastGear) {
-        joystick->releaseButton(buttonForGear(lastGear));
-        // press and store new gear
-        joystick->pressButton(button);
-        lastGear = pose.gear;
-      }
-
       // upshift pressed
       // pose.upshift ? joystick->pressButton(0) : joystick->releaseButton(0);
 
@@ -175,7 +167,7 @@ void updatePose(Pose pose) {
   }
 
   // update joystick state
-  joystick->sendState();
+  joystick->sendState();  
 }
 
 void toggleEmulationMode() {
@@ -202,5 +194,16 @@ void processTelemetry(std::string data) {
 }
 
 uint8_t buttonForGear(Gear gear) {
-  return gear == gear == Gear::Reverse ? 8 : gear;
+  return gear - 1;
+}
+
+void shiftToGear(Gear gear, bool release) {
+  if (release && lastGear != Neutral)
+    joystick->releaseButton(buttonForGear(lastGear));
+  
+  if (gear != Neutral)
+    joystick->pressButton(buttonForGear(gear));
+  
+  joystick->sendState();
+  lastGear = gear;
 }

@@ -16,4 +16,10 @@ class CANProcessor {
     void updateTelemetry(float speed, int rpm);
 
     Pose pose;
+
+    // extract bits [msb : msb-len] from input into the low bits of the result
+    unsigned bitExtract(unsigned input, int msb, int len)
+    {
+      return (input >> (msb-len + 1)) & ~(~0 << len);
+    }
 };

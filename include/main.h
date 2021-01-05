@@ -47,6 +47,7 @@ void setupJoystick();
 void updatePose(Pose pose);
 void processTelemetry(std::string data);
 void toggleEmulationMode();
+void shiftToGear(Gear gear, bool release = true);
 uint8_t buttonForGear(Gear gear);
 
 Pose lastPose;
